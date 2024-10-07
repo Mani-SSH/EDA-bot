@@ -1,0 +1,12 @@
+#virtual environment
+.venv
+__pychace__/
+.environment
+.env
+
+.venv/
+
+# VS Code specific files
+.vscode/
+*.code-workspace
+
