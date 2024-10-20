@@ -1,6 +1,6 @@
 #virtual environment
 .venv
-__pychace__/
+__pycache__/
 .environment
 .env
 
