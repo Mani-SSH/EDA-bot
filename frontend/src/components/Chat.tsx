@@ -1,17 +1,9 @@
-import React from "react";
+// components/Chat.tsx
+import React, { useState } from "react";
 import { SlCursor } from "react-icons/sl";
 import { useSidebar } from "../contexts/SidebarContext";
-import { useState } from "react";
+import { useChat } from "../contexts/ChatContext";
 
-/**
- * Represents the structure of a message exchanged between the user and the server.
- *
- * @property {string} text - The content of the message.
- * @property {"user" | "server"} sender - The sender of the message, either "user" or "server".
- * @property {string[]} [keywords] - Optional array of keywords related to the message (if any).
- * @property {boolean} [showEDAPrompt] - Optional flag indicating whether to show a prompt
- *                                       for Exploratory Data Analysis (EDA) based on the message content.
- */
 interface Message {
   text: string;
   sender: "user" | "server";
@@ -20,43 +12,42 @@ interface Message {
 }
 
 const Chat = () => {
-  const [messages, setMessages] = useState<Message[]>([]); // Array of message of type Message
-  const [inputMessage, setInputMessage] = useState(""); // Messages from the user input
+  const [inputMessage, setInputMessage] = useState("");
   const { isSidebarOpen } = useSidebar();
+  const {
+    currentSessionId,
+    getCurrentSession,
+    updateSessionMessage,
+    createNewSession,
+  } = useChat();
 
   const BACKEND_URL =
     import.meta.env.REACT_APP_BACKEND_URL || "http://localhost:3000";
   const STREAMLIT_URL =
     import.meta.env.REACT_APP_STREAMLIT_URL || "http://localhost:8501";
 
-  /**
-   * Opens new tab to the Streamlit URL for the EDA processes
-   */
+  const currentSession = getCurrentSession();
+
+  // Create a new session if none exists
+  React.useEffect(() => {
+    if (!currentSession) {
+      createNewSession();
+    }
+  }, [currentSession, createNewSession]);
+
   const openStreamlit = () => {
     window.open(STREAMLIT_URL, "_blank");
   };
 
-  /**
-   * On submitting the Form:
-   * Message will have sender: user
-   * Message will be sent to the server, and response is gathered
-   * Gathered response will have sender: server
-   */
   const onFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!inputMessage.trim()) return;
+    if (!inputMessage.trim() || !currentSessionId) return;
 
-    const newMessage: Message = { text: inputMessage, sender: "user" }; // creating new message of type Message with text as user input and sender: user
-    setMessages((prevMessages) => [...prevMessages, newMessage]); // adds newMessage to end of array prevMessages
+    const newMessage: Message = { text: inputMessage, sender: "user" };
+    const updatedMessages = [...(currentSession?.messages || []), newMessage];
+    updateSessionMessage(currentSessionId, updatedMessages);
 
     try {
-      console.log("Sending request to:", `${BACKEND_URL}/send-message`); //checking the url before fetching
-
-      /**
-       * Sends a POST request to the server to send a message.
-       * The request is sent to the URL constructed from BACKEND_URL and the endpoint '/send-message'.
-       * The body contains the message, which is converted to a JSON string.
-       */
       const response = await fetch(`${BACKEND_URL}/send-message`, {
         method: "POST",
         headers: {
@@ -66,12 +57,10 @@ const Chat = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`); // if response has an error
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log("Response from server:", data.response); // logging response from the server\
-
       const serverMessage: Message = {
         text: data.response,
         sender: "server",
@@ -79,11 +68,14 @@ const Chat = () => {
         showEDAPrompt: data.is_eda_related,
       };
 
-      setMessages((prevMessages) => [...prevMessages, serverMessage]);
+      updateSessionMessage(currentSessionId, [
+        ...updatedMessages,
+        serverMessage,
+      ]);
     } catch (error) {
       console.error("Error sending message:", error);
-      setMessages((prevMessages) => [
-        ...prevMessages,
+      updateSessionMessage(currentSessionId, [
+        ...updatedMessages,
         {
           text: "Error: Unable to reach the server. Please try again later.",
           sender: "server",
@@ -98,16 +90,19 @@ const Chat = () => {
     if (accept) {
       openStreamlit();
     }
-    setMessages((prevMessages) =>
-      prevMessages.map((msg, i) =>
+    if (currentSessionId && currentSession) {
+      const updatedMessages = currentSession.messages.map((msg, i) =>
         i === index ? { ...msg, showEDAPrompt: false } : msg
-      )
-    );
+      );
+      updateSessionMessage(currentSessionId, updatedMessages);
+    }
   };
 
   const renderMessageText = (text: string) => {
     return { __html: text };
   };
+
+  if (!currentSession) return null;
 
   return (
     <div
@@ -116,7 +111,7 @@ const Chat = () => {
       }`}
     >
       <div className="flex-grow overflow-auto p-10">
-        {messages.map((message, index) => (
+        {currentSession.messages.map((message, index) => (
           <div
             key={index}
             className={`mb-2 ${
