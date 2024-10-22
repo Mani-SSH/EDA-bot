@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { SlCursor } from "react-icons/sl";
+import { VscLayoutSidebarLeft } from "react-icons/vsc";
 
 /**
  * Represents the structure of a message exchanged between the user and the server.
@@ -20,10 +21,15 @@ interface Message {
 function App() {
   const [messages, setMessages] = useState<Message[]>([]); // Array of message of type Message
   const [inputMessage, setInputMessage] = useState(""); // Messages from the user input
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
   const BACKEND_URL =
     import.meta.env.REACT_APP_BACKEND_URL || "http://localhost:3000";
   const STREAMLIT_URL =
     import.meta.env.REACT_APP_STREAMLIT_URL || "http://localhost:8501";
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!isSidebarOpen);
+  };
 
   /**
    * Opens new tab to the Streamlit URL for the EDA processes
@@ -106,73 +112,95 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-zinc-400">
-      <div className="flex-grow overflow-auto p-4">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`mb-2 ${
-              message.sender === "user" ? "text-right" : "text-left"
-            }`}
+    <div className="flex flex-row h-screen w-screen bg-zinc-400">
+      <nav
+        className={`flex-col bg-stone-600 text-white p-4 transition-all duration-300 overflow-hidden ${
+          isSidebarOpen ? "w-1/4" : "w-20"
+        }`}
+      >
+        <div className="pb-2 flex justify-between items-center">
+          <button
+            onClick={toggleSidebar}
+            className="bg-stone-600 text-white mr-2 hover:bg-stone-500 transition-colors duration-200 ml-auto"
           >
+            <VscLayoutSidebarLeft size={20} />
+          </button>
+        </div>
+      </nav>
+      <div
+        className={`flex flex-col transition-all duration-300 ${
+          isSidebarOpen ? "w-3/4" : "w-full"
+        }`}
+      >
+        <div className="flex-grow overflow-auto p-10">
+          {messages.map((message, index) => (
             <div
-              className={`inline-block p-2 rounded-lg ${
-                message.sender === "user"
-                  ? "bg-stone-700 text-white"
-                  : "bg-gray-300 text-black"
+              key={index}
+              className={`mb-2 ${
+                message.sender === "user" ? "text-right" : "text-left"
               }`}
             >
-              <div dangerouslySetInnerHTML={renderMessageText(message.text)} />
-              {message.showEDAPrompt && (
-                <div className="mt-2">
-                  <p>
-                    Would you like to use our Streamlit interface for these
-                    operations?
-                  </p>
-                  <div className="mt-2">
-                    <button
-                      onClick={() => handleEDAResponse(true, index)}
-                      className="bg-stone-600 text-white px-4 py-2 rounded mr-2 hover:bg-stone-400 transition-colors duration-200"
-                    >
-                      Yes
-                    </button>
-                    <button
-                      onClick={() => handleEDAResponse(false, index)}
-                      className="bg-stone-600 text-white px-4 py-2 rounded hover:bg-stone-400 transition-colors duration-200"
-                    >
-                      No
-                    </button>
+              <div
+                className={`inline-block p-2 rounded-md font ${
+                  message.sender === "user"
+                    ? "bg-stone-700 text-white"
+                    : "bg-gray-300 text-black"
+                }`}
+              >
+                <div
+                  dangerouslySetInnerHTML={renderMessageText(message.text)}
+                />
+                {message.showEDAPrompt && (
+                  <div className="mt-2 p-3 bg-stone-400 rounded-lg text-black">
+                    <p>
+                      Would you like to use our Streamlit interface for these
+                      operations?
+                    </p>
+                    <div className="mt-2">
+                      <button
+                        onClick={() => handleEDAResponse(true, index)}
+                        className="bg-stone-600 text-white px-4 py-2 rounded mr-2 hover:bg-stone-400 transition-colors duration-200"
+                      >
+                        Yes
+                      </button>
+                      <button
+                        onClick={() => handleEDAResponse(false, index)}
+                        className="bg-stone-600 text-white px-4 py-2 rounded hover:bg-stone-400 transition-colors duration-200"
+                      >
+                        No
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-      <div className="p-4">
-        <form
-          onSubmit={onFormSubmit}
-          className="flex items-center w-full max-w-3xl relative mx-auto"
-        >
-          <input
-            type="text"
-            className="w-full px-6 py-4 pr-16 border rounded-full focus:outline-none focus:ring-2 focus:ring-stone-500 bg-stone-300 text-black"
-            placeholder="Type your message..."
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-          />
-          <button
-            className={`absolute right-1 text-white p-3 rounded-full transition-colors duration-200 ${
-              inputMessage.trim()
-                ? "bg-stone-600 hover:bg-stone-500"
-                : "bg-stone-500"
-            }`}
-            type="submit"
-            disabled={!inputMessage.trim()}
+          ))}
+        </div>
+        <div className="p-5">
+          <form
+            onSubmit={onFormSubmit}
+            className="flex items-center w-full max-w-3xl relative mx-auto"
           >
-            <SlCursor size={20} />
-          </button>
-        </form>
+            <input
+              type="text"
+              className="w-full px-6 py-4 pr-16 border rounded-full focus:outline-none focus:ring-2 focus:ring-stone-500 bg-stone-300 text-black"
+              placeholder="Type your message..."
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+            />
+            <button
+              className={`absolute right-1 text-white p-3 rounded-full transition-colors duration-200 ${
+                inputMessage.trim()
+                  ? "bg-stone-600 hover:bg-stone-500"
+                  : "bg-stone-500"
+              }`}
+              type="submit"
+              disabled={!inputMessage.trim()}
+            >
+              <SlCursor size={20} />
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );
