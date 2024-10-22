@@ -1,5 +1,5 @@
 // components/Chat.tsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SlCursor } from "react-icons/sl";
 import { useSidebar } from "../contexts/SidebarContext";
 import { useChat } from "../contexts/ChatContext";
@@ -15,6 +15,7 @@ const Chat = () => {
   const [inputMessage, setInputMessage] = useState("");
   const { isSidebarOpen } = useSidebar();
   const {
+    sessions,
     currentSessionId,
     getCurrentSession,
     updateSessionMessage,
@@ -28,12 +29,15 @@ const Chat = () => {
 
   const currentSession = getCurrentSession();
 
-  // Create a new session if none exists
-  React.useEffect(() => {
-    if (!currentSession) {
-      createNewSession();
-    }
-  }, [currentSession, createNewSession]);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (sessions.length === 0) {
+        createNewSession();
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const openStreamlit = () => {
     window.open(STREAMLIT_URL, "_blank");

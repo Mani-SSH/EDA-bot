@@ -1,4 +1,4 @@
-import React, { useContext, useState, createContext } from "react";
+import React, { useContext, useState, createContext, useCallback } from "react";
 
 /**
  * Represents the structure of a message exchanged between the user and the server.
@@ -43,8 +43,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSessionId, setCurrentSessionId] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
-  const createNewSession = () => {
+  const createNewSession = useCallback(() => {
     const newSession: ChatSession = {
       id: Date.now().toString(),
       title: "Chat No: " + (sessions.length + 1),
@@ -53,7 +54,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({
     };
     setSessions((prev) => [...prev, newSession]);
     setCurrentSessionId(newSession.id);
-  };
+    setIsInitialized(true);
+  }, [sessions.length, isInitialized]);
 
   const deleteSession = (id: string) => {
     setSessions((prev) => prev.filter((session) => session.id !== id));
