@@ -1,0 +1,187 @@
+{
+  "intents": [
+    {
+      "name": "greetings",
+      "keywords": [
+        "hello",
+        "hi",
+        "hey",
+        "good morning",
+        "good afternoon",
+        "greetings",
+        "how are you"
+      ],
+      "responses": [
+        "Hi there! How can I assist you with your data analysis?",
+        "Hello! What kind of data analysis are you working on?",
+        "Hi! I'm here to help with your EDA needs."
+      ]
+    },
+    {
+      "name": "goodbyes",
+      "keywords": [
+        "bye",
+        "goodbye",
+        "see you",
+        "farewell",
+        "thanks bye",
+        "exit"
+      ],
+      "responses": [
+        "Goodbye! I hope I was helpful with your EDA tasks.",
+        "See you later! Good luck with your analysis!",
+        "Bye! Let me know if you need more help with your data analysis."
+      ]
+    },
+    {
+      "name": "thanks",
+      "keywords": [
+        "thank you",
+        "thanks",
+        "appreciate it",
+        "great help",
+        "helpful"
+      ],
+      "responses": [
+        "You're welcome! Let me know if you need any more help.",
+        "Happy to help! Feel free to ask if you have more questions.",
+        "Glad I could help! Good luck with your analysis!"
+      ]
+    },
+    {
+      "name": "help",
+      "keywords": [
+        "help",
+        "confused",
+        "not sure",
+        "stuck",
+        "how do i",
+        "how to"
+      ],
+      "responses": [
+        "I can help you with various EDA tasks. What specific aspect are you working on?",
+        "What part of the analysis are you struggling with?",
+        "I'm here to help! Could you describe what you're trying to analyze?"
+      ]
+    }
+  ],
+  "eda_keywords": {
+    "data_cleaning": {
+      "keywords": ["clean", "preprocess", "prepare", "missing", "invalid"],
+      "techniques": {
+        "missing_values": ["null", "na", "missing data", "empty values"],
+        "outliers": ["outlier detection", "anomaly", "unusual values"],
+        "normalization": ["normalize", "standardize", "scale"],
+        "encoding": ["encode", "categorical", "one-hot", "label encoding"]
+      }
+    },
+    "descriptive_stats": {
+      "keywords": ["statistics", "descriptive", "summary", "describe"],
+      "techniques": {
+        "central_tendency": ["mean", "median", "mode", "average"],
+        "dispersion": ["variance", "standard deviation", "range", "iqr"],
+        "distribution": ["skewness", "kurtosis", "distribution shape"]
+      }
+    },
+    "visualization": {
+      "keywords": ["plot", "graph", "chart", "visualize", "display"],
+      "types": {
+        "distribution": [
+          "histogram",
+          "density plot",
+          "box plot",
+          "violin plot"
+        ],
+        "relationship": [
+          "scatter plot",
+          "pair plot",
+          "correlation plot",
+          "heat map"
+        ],
+        "comparison": ["bar chart", "bar plot", "line chart", "pie chart"],
+        "composition": ["stacked bar", "area chart", "treemap"]
+      }
+    },
+    "clustering": {
+      "keywords": ["cluster", "segment", "group", "partition"],
+      "techniques": {
+        "k_means": ["kmeans", "k-means", "centroid-based"],
+        "hierarchical": [
+          "hierarchical clustering",
+          "dendrogram",
+          "agglomerative"
+        ],
+        "dbscan": ["density-based", "dbscan", "spatial clustering"],
+        "gaussian_mixture": ["gmm", "gaussian mixture", "em clustering"]
+      }
+    },
+    "dimensionality_reduction": {
+      "keywords": [
+        "dimension reduction",
+        "reduce dimensions",
+        "feature extraction"
+      ],
+      "techniques": {
+        "pca": ["principal component analysis", "pca", "principal components"],
+        "t_sne": ["t-sne", "tsne", "stochastic neighbor embedding"],
+        "umap": ["umap", "uniform manifold", "dimensional embedding"],
+        "factor_analysis": ["factor analysis", "fa", "latent factors"]
+      }
+    },
+    "correlation_analysis": {
+      "keywords": ["correlation", "relationship", "association", "dependency"],
+      "techniques": {
+        "pearson": ["pearson correlation", "linear correlation"],
+        "spearman": ["spearman correlation", "rank correlation"],
+        "chi_square": [
+          "chi square test",
+          "chi-squared",
+          "categorical correlation"
+        ]
+      }
+    },
+    "hypothesis_testing": {
+      "keywords": ["hypothesis test", "statistical test", "significance test"],
+      "techniques": {
+        "t_test": ["t test", "student t", "mean comparison"],
+        "anova": ["analysis of variance", "anova", "f test"],
+        "chi_square": ["chi square test", "independence test"],
+        "kolmogorov": ["ks test", "kolmogorov-smirnov", "distribution test"]
+      }
+    },
+    "feature_selection": {
+      "keywords": [
+        "feature selection",
+        "variable selection",
+        "attribute selection"
+      ],
+      "techniques": {
+        "filter": ["correlation based", "chi square", "mutual information"],
+        "wrapper": ["forward selection", "backward elimination", "recursive"],
+        "embedded": ["lasso", "ridge", "elastic net"]
+      }
+    },
+    "time_series": {
+      "keywords": ["time series", "temporal", "sequential", "trend"],
+      "techniques": {
+        "decomposition": ["seasonal decomposition", "trend analysis"],
+        "stationarity": ["dickey fuller", "adf test", "stationarity test"],
+        "autocorrelation": ["acf", "pacf", "autocorrelation"]
+      }
+    }
+  },
+  "context_transitions": {
+    "clustering_to_visualization": [
+      "Would you like to visualize the clusters?",
+      "Shall we create some plots to understand the clusters better?"
+    ],
+    "visualization_to_stats": [
+      "Would you like to get some statistical summary of what we're seeing?",
+      "Should we calculate some descriptive statistics for these patterns?"
+    ],
+    "correlation_to_features": [
+      "Based on the correlations, should we look at feature selection?",
+      "Would you like to select the most relevant features based on these correlations?"
+    ]
+  }
+}
