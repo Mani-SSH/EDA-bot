@@ -1,4 +1,11 @@
 {
+  "phrases": [
+    "I spotted",
+    "It looks like you're interested in",
+    "You're working with",
+    "You mentioned",
+    "I found a focus on"
+  ],
   "intents": [
     {
       "name": "greetings",
