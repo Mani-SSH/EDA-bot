@@ -1,0 +1,10 @@
+{
+  "available_topics": {
+    "visualization": {
+      "available": ["distribution", "relationship", "comparison", "composition"]
+    },
+    "clustering": {
+      "available": ["k_means", "hierarchical", "dbscan", "gaussian_mixture"]
+    }
+  }
+}

@@ -103,7 +103,12 @@ const Chat = () => {
   };
 
   const renderMessageText = (text: string) => {
-    return { __html: text };
+    return text.split("\n").map((line, index) => (
+      <React.Fragment key={index}>
+        {line}
+        <br />
+      </React.Fragment>
+    ));
   };
 
   if (!currentSession) return null;
@@ -129,7 +134,7 @@ const Chat = () => {
                   : "bg-gray-300 text-black"
               }`}
             >
-              <div dangerouslySetInnerHTML={renderMessageText(message.text)} />
+              <div>{renderMessageText(message.text)}</div>
               {message.showEDAPrompt && (
                 <div className="mt-2 p-3 bg-stone-400 rounded-lg text-black">
                   <p>
