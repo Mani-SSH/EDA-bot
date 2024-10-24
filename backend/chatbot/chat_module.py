@@ -16,21 +16,21 @@ nltk.download('wordnet', quiet=True)  # WordNet data for synonym lookup
 nltk.download('stopwords', quiet=True)  # List of stopwords
 
 class EDAChatbot:
-    def __init__(self, config_path: str = "eda_config.json"):
-        #chatbot initialization with config.json
+    def __init__(self, knowledge_base_path: str = "eda_knowledge_base.json"):
+        #chatbot initialization with eda_knowledge_base
         self.lemmatizer = WordNetLemmatizer()
         self.stop_words = set(stopwords.words('english'))
-        self.config_path = config_path
+        self.knowledge_base_path =  os.path.join(os.path.dirname(__file__), "eda_knowledge_base.json")
         self.knowledge_base = self.load_knowledge_base()
         self.keyword_mapping = self._build_keyword_mapping()
 
     def load_knowledge_base(self)->dict:
         '''Load and Validate the knowledge base from JSON file'''
         try:
-            if not os.path.exists(self.config_path):
-                raise FileNotFoundError(f"{self.config_path} does not exists")
+            if not os.path.exists(self.knowledge_base_path):
+                raise FileNotFoundError(f"{self.knowledge_base_path} does not exists")
             
-            with open(self.config_path, 'r') as f:
+            with open(self.knowledge_base_path, 'r') as f:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading knowledge base: {str(e)}")
@@ -171,11 +171,13 @@ class EDAChatbot:
 
         # Check intents first
         for intent in self.knowledge_base.get("intents", []):
+            print(f"Intent detected: {intent['name']}")  # Debugging
             if any(keyword in message_lower for keyword in intent["keywords"]):
                 return random.choice(intent["responses"]), False
 
         # Extract and process the keywords
         extracted_keywords = self.extract_keywords(message)
+        print(f"Extracted keywords: {extracted_keywords}")  # Debugging
         if extracted_keywords:
             # Group keywords by category
             '''
@@ -252,7 +254,7 @@ class EDAChatbot:
     def _save_knowledge_base(self) -> None:
         """Save the current knowledge base to the JSON file"""
         try:
-            with open(self.config_path, 'w') as f:
+            with open(self.knowledge_base_path, 'w') as f:
                 json.dump(self.knowledge_base, f, indent=4, sort_keys=True, ensure_ascii=False)
         except Exception as e:
             print(f"Error saving knowledge base: {str(e)}")
