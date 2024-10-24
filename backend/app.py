@@ -2,7 +2,7 @@ import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
-from chat_module import get_response  # Import the get_response function from chat.py
+from chat_module import EDAChatbot  # Import the get_response function from chat.py
 
 # Load environment variables
 load_dotenv()
@@ -14,6 +14,8 @@ CORS(app, resources={r"/send-message": {"origins": "*"}})
 
 # Set the port, defaulting to 3000 if BACKEND_PORT is not set
 PORT = int(os.getenv('BACKEND_PORT', 3000))
+
+chatbot = EDAChatbot()
 
 @app.route('/send-message', methods=['POST'])
 def receive_message():
@@ -27,7 +29,7 @@ def receive_message():
         print(f'Received message: {message}')
         
         # Get the response from the chat function
-        response_message, is_eda_related = get_response(message)
+        response_message, is_eda_related = chatbot.get_response(message)
 
         # Return the response as JSON
         return jsonify({
