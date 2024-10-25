@@ -8,8 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start-backend": "cd ../backend && call .venv\\Scripts\\activate && python app.py",
-    "start-streamlit": "cd ../backend && call .venv\\Scripts\\activate && streamlit run streamlit_app/Index.py --server.port 8501 --server.headless=true",
+    "start-backend": "cd ../backend && call .venv\\Scripts\\activate && set PYTHONPATH=. && python app.py",
+    "start-streamlit": "cd ../backend && call .venv\\Scripts\\activate && set PYTHONPATH=. && streamlit run streamlit_app/Index.py --server.port 8501 --server.headless=true",
     "start": "concurrently \"pnpm run dev\" \"pnpm run start-backend\" \"pnpm run start-streamlit\""
   },
   "dependencies": {

@@ -175,6 +175,13 @@
         "stationarity": ["dickey fuller", "adf test", "stationarity test"],
         "autocorrelation": ["acf", "pacf", "autocorrelation"]
       }
+    },
+    "algorithms": {
+      "keywords": ["algo", "algorithm"],
+      "techniques": {
+        "linear": ["bubble sort", "quick sort"],
+        "quad": ["manish", "sachin"]
+      }
     }
   },
   "context_transitions": {
