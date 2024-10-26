@@ -30,6 +30,3 @@ class Topic_Manager:
         return list(set(topics))
 
     
-dummy = Topic_Manager()
-
-print(dummy.topics)

@@ -28,7 +28,7 @@ def receive_message():
             return jsonify({"error": "No message provided"}), 400
         
         message = data['message']
-        print(f'Received message: {message}')
+        # print(f'Received message: {message}')
         
         # Get the response from the chat function
         response_message, is_eda_related = chatbot.get_response(message)
