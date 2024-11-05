@@ -8,6 +8,7 @@ from nltk.corpus import wordnet, stopwords
 from nltk.stem import WordNetLemmatizer
 from nltk import pos_tag, word_tokenize
 
+from .topic_manager import Topic_Manager
 # Download required NLTK data for tokenization, tagging, lemmatization, and stopword handling
 nltk.download('punkt', quiet=True)  # Tokenization data
 nltk.download('averaged_perceptron_tagger', quiet=True)  # POS tagging model
@@ -16,21 +17,21 @@ nltk.download('wordnet', quiet=True)  # WordNet data for synonym lookup
 nltk.download('stopwords', quiet=True)  # List of stopwords
 
 class EDAChatbot:
-    def __init__(self, config_path: str = "eda_config.json"):
-        #chatbot initialization with config.json
+    def __init__(self, knowledge_base_path: str = "eda_knowledge_base.json"):
+        #chatbot initialization with eda_knowledge_base
         self.lemmatizer = WordNetLemmatizer()
         self.stop_words = set(stopwords.words('english'))
-        self.config_path = config_path
+        self.knowledge_base_path =  os.path.join(os.path.dirname(__file__), "eda_knowledge_base.json")
         self.knowledge_base = self.load_knowledge_base()
         self.keyword_mapping = self._build_keyword_mapping()
 
     def load_knowledge_base(self)->dict:
         '''Load and Validate the knowledge base from JSON file'''
         try:
-            if not os.path.exists(self.config_path):
-                raise FileNotFoundError(f"{self.config_path} does not exists")
+            if not os.path.exists(self.knowledge_base_path):
+                raise FileNotFoundError(f"{self.knowledge_base_path} does not exists")
             
-            with open(self.config_path, 'r') as f:
+            with open(self.knowledge_base_path, 'r') as f:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading knowledge base: {str(e)}")
@@ -169,14 +170,23 @@ class EDAChatbot:
         '''Generate response based on message content'''
         message_lower = message.lower()
 
-        # Check intents first
-        for intent in self.knowledge_base.get("intents", []):
-            if any(keyword in message_lower for keyword in intent["keywords"]):
-                return random.choice(intent["responses"]), False
+        try:
+            topic_manager = Topic_Manager()
+            found_topics = set()
 
-        # Extract and process the keywords
-        extracted_keywords = self.extract_keywords(message)
-        if extracted_keywords:
+            # Check intents first
+            for intent in self.knowledge_base.get("intents", []):
+                # print(f"Intent detected: {intent['name']}")  # Debugging
+                if any(keyword in message_lower for keyword in intent["keywords"]):
+                    return random.choice(intent["responses"]), False
+
+            # Extract and process the keywords
+            extracted_keywords = self.extract_keywords(message)
+
+            # Check for the extracted_keywords in message
+            if not extracted_keywords:
+                return "Could you please provide more details about your data analysis task?", False
+                         
             # Group keywords by category
             '''
             Example: 
@@ -206,21 +216,38 @@ class EDAChatbot:
                     categories[category][subcategory] = []
                 categories[category][subcategory].append(keyword)
 
-            # Build response
-            response = "I noticed EDA-related concepts:\n"
+                # Check for available topics in topic_manager
+                if subcategory in topic_manager.topics:
+                    found_topics.add(subcategory)
+
+            '''Building response'''
+            # build initial response 
+            response = f"I noticed {len(extracted_keywords)} EDA-related concept{'s' if len(extracted_keywords)>1 else ''}:\n"
+
             phrases = self.knowledge_base.get("phrases",[])
+
+            print(categories[0])
+
             for category, subcategories in categories.items():
-                Title1 = f"{category.replace('_', ' ').title()}"
-                response += f"You are talking about {Title1} right? "
+                category_title = category.replace('_', ' ').title()
+                category_items = []
+                
                 for subcategory, keywords in subcategories.items():
-                    keyword_str = ", ".join(keywords)
-                    phrase = random.choice(phrases)
+                    keyword_str = ", ".join(f'"{k}"' for k in keywords)
                     if subcategory != "general":
-                        Title2 = f"{subcategory.replace ('_', ' ')}"
-                        response += f" {phrase} \"{keyword_str}\" which typically falls under {Title2} topic\n"
+                        subcategory_title = subcategory.replace('_', ' ')
+                        category_items.append(f"• {keyword_str} ({subcategory_title})")
                     else:
-                        response += f"{phrase} \"{keyword_str}\" which typically falls under {Title1} topic\n"
-            response += "Let me know if you'd like to dive deeper into any of these!"
+                        category_items.append(f"• {keyword_str}")
+            
+            response += f"📊 {category_title}:\n"
+            response += "\n".join(category_items) + "\n\n"
+            if found_topics:
+                response += f"I have information on these topics: {', '.join(found_topics).upper()}\n"
+                response += "Let me know if you'd like to dive deeper into any of these!"
+            else:
+                response += "Sorry, but I cannot help you with this one"
+
             # Check for context transitions
             if previous_context:
                 transition_key = f"{previous_context}_to_{category}"
@@ -228,31 +255,21 @@ class EDAChatbot:
                     response += f"\n\n{random.choice(self.knowledge_base['context_transitions'][transition_key])}"
 
             return response, True
-
-        return "Could you please provide more details about your data analysis task?", False
-
-    def add_intent(self, name: str, keywords: List[str], responses: List[str]) -> None:
-        """Add a new intent to the knowledge base"""
-        self.knowledge_base["intents"].append({
-            "name": name,
-            "keywords": keywords,
-            "responses": responses
-        })
-        self._save_knowledge_base()
-
-    def add_eda_category(self, category: str, keywords: List[str], techniques: Dict[str, List[str]]) -> None:
-        """Add a new EDA category with its keywords and techniques"""
-        self.knowledge_base["eda_keywords"][category] = {
-            "keywords": keywords,
-            "techniques": techniques
-        }
-        self.keyword_mapping = self._build_keyword_mapping()
-        self._save_knowledge_base()
-
-    def _save_knowledge_base(self) -> None:
-        """Save the current knowledge base to the JSON file"""
-        try:
-            with open(self.config_path, 'w') as f:
-                json.dump(self.knowledge_base, f, indent=4, sort_keys=True, ensure_ascii=False)
+        
         except Exception as e:
-            print(f"Error saving knowledge base: {str(e)}")
+            print(f"Error in get_resposne: {str(e)}")
+            return "I am having trouble processing your request right now.", False
+        
+# response = f"I noticed {len(extracted_keywords)} EDA-related concepts:\n"
+#             phrases = self.knowledge_base.get("phrases",[])
+#             for category, subcategories in categories.items():
+#                 Title1 = f"{category.replace('_', ' ').title()}"
+#                 response += f"You are talking about {Title1} right? "
+#                 for subcategory, keywords in subcategories.items():
+#                     keyword_str = ", ".join(keywords)
+#                     phrase = random.choice(phrases)
+#                     if subcategory != "general":
+#                         Title2 = f"{subcategory.replace ('_', ' ')}"
+#                         response += f" {phrase} \"{keyword_str}\" which typically falls under {Title2} topic\n"
+#                     else:
+#                         response += f"{phrase} \"{keyword_str}\" which typically falls under {Title1} topic\n"

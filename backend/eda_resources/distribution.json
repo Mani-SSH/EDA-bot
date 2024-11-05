@@ -1,0 +1,45 @@
+{
+  "topic": "distribution",
+  "description": "Distribution refers to the way data is spread out or clustered over a range of values. It helps to understand the overall pattern in a dataset and identifies how frequently values occur.",
+  "common_types": [
+    {
+      "name": "Normal Distribution",
+      "description": "Also known as Gaussian distribution, it is a symmetric, bell-shaped distribution where most of the data points cluster around the mean."
+    },
+    {
+      "name": "Uniform Distribution",
+      "description": "In a uniform distribution, all outcomes are equally likely. The probability is constant across the range of possible values."
+    },
+    {
+      "name": "Skewed Distribution",
+      "description": "A distribution that is not symmetrical. It can be left-skewed (negatively skewed) or right-skewed (positively skewed), depending on the direction of the tail."
+    },
+    {
+      "name": "Bimodal Distribution",
+      "description": "Characterized by having two distinct peaks. This occurs when the data contains two different modes."
+    }
+  ],
+  "visualization_techniques": [
+    {
+      "technique": "Histogram",
+      "description": "A graphical representation of the distribution of numerical data, using bars to show the frequency of data intervals."
+    },
+    {
+      "technique": "Box Plot",
+      "description": "Displays the data distribution based on a five-number summary (minimum, first quartile, median, third quartile, and maximum), highlighting outliers."
+    },
+    {
+      "technique": "Density Plot",
+      "description": "A smoothed version of a histogram, used to estimate the probability density function of a continuous variable."
+    },
+    {
+      "technique": "Violin Plot",
+      "description": "Combines aspects of a box plot and a density plot to show the distribution shape along with statistical summaries."
+    }
+  ],
+  "applications": [
+    "Understanding data spread before applying statistical analysis.",
+    "Detecting outliers or unusual patterns in the data.",
+    "Choosing appropriate statistical models based on data distribution."
+  ]
+}

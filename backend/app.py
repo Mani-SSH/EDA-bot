@@ -1,8 +1,10 @@
 import os
+import sys
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
-from chat_module import EDAChatbot  # Import the get_response function from chat.py
+
+from chatbot.chat_module import EDAChatbot # Import the get_response function from chat.py
 
 # Load environment variables
 load_dotenv()
@@ -26,7 +28,7 @@ def receive_message():
             return jsonify({"error": "No message provided"}), 400
         
         message = data['message']
-        print(f'Received message: {message}')
+        # print(f'Received message: {message}')
         
         # Get the response from the chat function
         response_message, is_eda_related = chatbot.get_response(message)

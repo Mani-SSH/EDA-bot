@@ -1,0 +1,45 @@
+{
+  "topic": "relationship",
+  "description": "Relationship refers to the way two or more variables are associated or interact with each other. It helps in understanding how one variable affects or is related to another variable.",
+  "common_types": [
+    {
+      "name": "Positive Correlation",
+      "description": "Occurs when an increase in one variable tends to be associated with an increase in the other variable. The relationship is direct."
+    },
+    {
+      "name": "Negative Correlation",
+      "description": "Occurs when an increase in one variable tends to be associated with a decrease in the other variable. The relationship is inverse."
+    },
+    {
+      "name": "No Correlation",
+      "description": "There is no apparent relationship between the variables. Changes in one variable do not predict changes in the other."
+    },
+    {
+      "name": "Non-linear Relationship",
+      "description": "The relationship between the variables is not a straight line; it may take the form of a curve, indicating a more complex association."
+    }
+  ],
+  "visualization_techniques": [
+    {
+      "technique": "Scatter Plot",
+      "description": "Displays individual data points based on two variables, with one variable on the x-axis and the other on the y-axis, allowing for the detection of patterns or correlations."
+    },
+    {
+      "technique": "Line Plot",
+      "description": "Connects data points with a line, useful for visualizing the relationship between variables over time or sequentially."
+    },
+    {
+      "technique": "Heatmap",
+      "description": "Uses colors to represent the strength of relationships between two or more variables, often visualizing correlation matrices."
+    },
+    {
+      "technique": "Pair Plot",
+      "description": "Shows the pairwise relationships between multiple variables in a dataset, with scatter plots for each pair."
+    }
+  ],
+  "applications": [
+    "Identifying whether two variables are related and the strength of that relationship.",
+    "Exploring relationships between features before applying machine learning algorithms.",
+    "Detecting multicollinearity in regression analysis."
+  ]
+}
