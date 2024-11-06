@@ -15,6 +15,7 @@ nltk.download('averaged_perceptron_tagger', quiet=True)  # POS tagging model
 nltk.download('universal_tagset', quiet=True)  # Tagset for simplified POS tags
 nltk.download('wordnet', quiet=True)  # WordNet data for synonym lookup
 nltk.download('stopwords', quiet=True)  # List of stopwords
+nltk.download('averaged_perceptron_tagger_eng', quiet=True)
 
 class EDAChatbot:
     def __init__(self, knowledge_base_path: str = "eda_knowledge_base.json"):
@@ -75,9 +76,10 @@ class EDAChatbot:
                     for keyword in keywords:
                         mapping[keyword.lower()] = (category, subcategory)
 
-                        for syn in wordnet.synsets(keyword.split()[0]):
-                            for lemma in syn.lemmas():
-                                mapping[lemma.name().lower] = (category,subcategory)
+                        no_space = keyword.replace(" ", "")
+                        with_hyphen = keyword.replace(" ", "-")
+                        mapping[no_space.lower()] = (category, subcategory)
+                        mapping[with_hyphen.lower()] = (category, subcategory)
 
         # mapping will be:
         #{
@@ -174,6 +176,9 @@ class EDAChatbot:
             topic_manager = Topic_Manager()
             found_topics = set()
 
+            print("Available topics in Topic Manager:", topic_manager.topics if hasattr(topic_manager, 'topics') else "No topics attribute found")
+
+
             # Check intents first
             for intent in self.knowledge_base.get("intents", []):
                 # print(f"Intent detected: {intent['name']}")  # Debugging
@@ -219,37 +224,42 @@ class EDAChatbot:
                 # Check for available topics in topic_manager
                 if subcategory in topic_manager.topics:
                     found_topics.add(subcategory)
+                if category in topic_manager.topics:
+                    found_topics.add(category)
+            print(f"The found topics are: {found_topics}")
+            
 
             '''Building response'''
             # build initial response 
-            response = f"I noticed {len(extracted_keywords)} EDA-related concept{'s' if len(extracted_keywords)>1 else ''}:\n"
-
             phrases = self.knowledge_base.get("phrases",[])
-
-            print(categories[0])
+            initial_phrase = random.choice(phrases)
+            
+            response = f"{initial_phrase} {len(extracted_keywords)} EDA-related concept{'s' if len(extracted_keywords)>1 else ''}:\n"
 
             for category, subcategories in categories.items():
                 category_title = category.replace('_', ' ').title()
-                category_items = []
+                response += f"📊 {category_title}:\n"
                 
                 for subcategory, keywords in subcategories.items():
                     keyword_str = ", ".join(f'"{k}"' for k in keywords)
                     if subcategory != "general":
-                        subcategory_title = subcategory.replace('_', ' ')
-                        category_items.append(f"• {keyword_str} ({subcategory_title})")
+                        subcategory_title = subcategory.replace('_', ' ').title()
+                        response += f"• {keyword_str} ({subcategory_title})\n"
                     else:
-                        category_items.append(f"• {keyword_str}")
+                        response += f"• {keyword_str} \n"
+    
+            response += "\n"
+
             
-            response += f"📊 {category_title}:\n"
-            response += "\n".join(category_items) + "\n\n"
             if found_topics:
-                response += f"I have information on these topics: {', '.join(found_topics).upper()}\n"
+                response += f"I have information on these topics: {', '.join(found_topics).title()}\n"
                 response += "Let me know if you'd like to dive deeper into any of these!"
             else:
-                response += "Sorry, but I cannot help you with this one"
+                response += "Sorry, but I cannot help you with this specific topic"
 
             # Check for context transitions
-            if previous_context:
+            if previous_context and len(categories) == 1:
+                category = next(iter(categories))  # Get the single category
                 transition_key = f"{previous_context}_to_{category}"
                 if transition_key in self.knowledge_base.get("context_transitions", {}):
                     response += f"\n\n{random.choice(self.knowledge_base['context_transitions'][transition_key])}"
@@ -260,16 +270,3 @@ class EDAChatbot:
             print(f"Error in get_resposne: {str(e)}")
             return "I am having trouble processing your request right now.", False
         
-# response = f"I noticed {len(extracted_keywords)} EDA-related concepts:\n"
-#             phrases = self.knowledge_base.get("phrases",[])
-#             for category, subcategories in categories.items():
-#                 Title1 = f"{category.replace('_', ' ').title()}"
-#                 response += f"You are talking about {Title1} right? "
-#                 for subcategory, keywords in subcategories.items():
-#                     keyword_str = ", ".join(keywords)
-#                     phrase = random.choice(phrases)
-#                     if subcategory != "general":
-#                         Title2 = f"{subcategory.replace ('_', ' ')}"
-#                         response += f" {phrase} \"{keyword_str}\" which typically falls under {Title2} topic\n"
-#                     else:
-#                         response += f"{phrase} \"{keyword_str}\" which typically falls under {Title1} topic\n"

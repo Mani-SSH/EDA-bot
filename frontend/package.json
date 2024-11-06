@@ -8,9 +8,12 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "start-backend": "cd ../backend && call .venv\\Scripts\\activate && set PYTHONPATH=. && python app.py",
-    "start-streamlit": "cd ../backend && call .venv\\Scripts\\activate && set PYTHONPATH=. && streamlit run streamlit_app/Index.py --server.port 8501 --server.headless=true",
-    "start": "concurrently \"pnpm run dev\" \"pnpm run start-backend\" \"pnpm run start-streamlit\""
+    "start-backend-windows": "cd ../backend && call .venv\\Scripts\\activate && set PYTHONPATH=. && python app.py",
+    "start-backend-macOS": "cd ../backend && source .venv/bin/activate && export PYTHONPATH=. && python3 app.py",
+    "start-streamlit-windows": "cd ../backend && call .venv\\Scripts\\activate && set PYTHONPATH=. && streamlit run streamlit_app/Index.py --server.port 8501 --server.headless=true",
+    "start-streamlit-macOS": "cd ../backend && source .venv/bin/activate && export PYTHONPATH=. && streamlit run streamlit_app/Index.py --server.port 8501 --server.headless=true",
+    "start": "concurrently \"pnpm run dev\" \"pnpm run start-backend-windows\" \"pnpm run start-streamlit-windows\"",
+    "start-all": "concurrently \"pnpm run dev\" \"pnpm run start-backend-macOS\" \"pnpm run start-streamlit-macOS\""
   },
   "dependencies": {
     "lucide-react": "^0.453.0",
