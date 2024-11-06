@@ -28,21 +28,43 @@ def receive_message():
             return jsonify({"error": "No message provided"}), 400
         
         message = data['message']
-        # print(f'Received message: {message}')
+        previous_context = data.get('previousContext')
         
         # Get the response from the chat function
-        response_message, is_eda_related = chatbot.get_response(message)
+        response_message, is_eda_related, new_context = chatbot.get_response(
+            message = message,
+            previous_context = previous_context
+        )
+
+        # Extract keywords for the response
+        extracted_keywords = [
+            keyword for keyword, _, _ in chatbot.extract_keywords(message)
+        ]
 
         # Return the response as JSON
         return jsonify({
             "response": response_message,
-            "is_eda_related": is_eda_related
+            "is_eda_related": is_eda_related,
+            "context": new_context,
+            "keywords": extracted_keywords
         })
     except Exception as e:
         # Log and return an error if something goes wrong
+        import traceback
         print(f"Error in receive_message: {str(e)}")
-        return jsonify({"error": "An error occurred while processing your request"}), 500
+        print("Traceback:")
+        print(traceback.format_exc())
+        return jsonify({
+            "error": "An error occurred while processing your request",
+            "details": str(e)
+        }), 500
+    
+
+@app.route('/health', methods=['GET'])
+def health_check():
+    return jsonify({"status": "healthy"})
+
 
 if __name__ == '__main__':
     # Run the app
-    app.run(debug=True, port=PORT)
+    app.run(debug=True, port=PORT, host='0.0.0.0')

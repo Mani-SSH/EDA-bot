@@ -9,10 +9,12 @@ interface Message {
   sender: "user" | "server";
   keywords?: string[];
   showEDAPrompt?: boolean;
+  previousContext?: string;
 }
 
 const Chat = () => {
   const [inputMessage, setInputMessage] = useState("");
+  const [previousContext, setPreviousContext] = useState<string | null>(null)
   const { isSidebarOpen } = useSidebar();
   const {
     sessions,
@@ -57,7 +59,10 @@ const Chat = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ message: inputMessage }),
+        body: JSON.stringify({ 
+          message: inputMessage, 
+          previousContext: previousContext 
+        }),
       });
 
       if (!response.ok) {
@@ -65,12 +70,16 @@ const Chat = () => {
       }
 
       const data = await response.json();
+      // console.log(data)
       const serverMessage: Message = {
         text: data.response,
         sender: "server",
         keywords: data.keywords,
         showEDAPrompt: data.is_eda_related,
+        previousContext: data.context
       };
+
+      setPreviousContext(data.context);
 
       updateSessionMessage(currentSessionId, [
         ...updatedMessages,

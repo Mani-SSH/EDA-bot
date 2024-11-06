@@ -168,29 +168,48 @@ class EDAChatbot:
     
 
 
-    def get_response(self, message: str, previous_context: Optional[str] = None) -> Tuple[str, bool]:
+    def get_response(self, message: str, previous_context: Optional[str] = None) -> Tuple[str, bool, Optional[str]]:
         '''Generate response based on message content'''
         message_lower = message.lower()
 
         try:
             topic_manager = Topic_Manager()
+
+            if previous_context:
+                try:
+                    prev_topics = json.loads(previous_context)
+                    # Check for general affirmative responses
+                    affirmative_words = {'yes', 'yeah', 'sure', 'okay', 'please', 'tell', 'explain'}
+                    if any(word in message_lower for word in affirmative_words):
+                        # If only one topic was offered, explain that topic
+                        if len(prev_topics) == 1:
+                            topic = prev_topics[0]
+                            explanation = f"I have got the explanation {previous_context} please wait..."
+                            return explanation, True, None  # Clear context after explaining
+                    
+                    # Check if user mentioned a specific topic
+                    for topic in prev_topics:
+                        if topic.lower() in message_lower:
+                            explanation = f"Hello I see I will be reaching out to you soon {previous_context}"
+                            return explanation, True, None  # Clear context after explaining
+                except json.JSONDecodeError:
+                    print(f"Invalid context format: {previous_context}")
+                    pass  # Invalid context, process as new query
+
             found_topics = set()
-
-            print("Available topics in Topic Manager:", topic_manager.topics if hasattr(topic_manager, 'topics') else "No topics attribute found")
-
-
+            
             # Check intents first
             for intent in self.knowledge_base.get("intents", []):
                 # print(f"Intent detected: {intent['name']}")  # Debugging
                 if any(keyword in message_lower for keyword in intent["keywords"]):
-                    return random.choice(intent["responses"]), False
+                    return random.choice(intent["responses"]), False, None
 
             # Extract and process the keywords
             extracted_keywords = self.extract_keywords(message)
 
             # Check for the extracted_keywords in message
             if not extracted_keywords:
-                return "Could you please provide more details about your data analysis task?", False
+                return "Could you please provide more details about your data analysis task?", False, None
                          
             # Group keywords by category
             '''
@@ -226,7 +245,6 @@ class EDAChatbot:
                     found_topics.add(subcategory)
                 if category in topic_manager.topics:
                     found_topics.add(category)
-            print(f"The found topics are: {found_topics}")
             
 
             '''Building response'''
@@ -257,16 +275,15 @@ class EDAChatbot:
             else:
                 response += "Sorry, but I cannot help you with this specific topic"
 
-            # Check for context transitions
-            if previous_context and len(categories) == 1:
-                category = next(iter(categories))  # Get the single category
-                transition_key = f"{previous_context}_to_{category}"
-                if transition_key in self.knowledge_base.get("context_transitions", {}):
-                    response += f"\n\n{random.choice(self.knowledge_base['context_transitions'][transition_key])}"
+            context_for_frontend = None
+            if found_topics:
+                context_for_frontend = json.dumps(list(found_topics))
 
-            return response, True
+            # Return the final response
+            return response, True, context_for_frontend
+
         
         except Exception as e:
             print(f"Error in get_resposne: {str(e)}")
-            return "I am having trouble processing your request right now.", False
+            return "I am having trouble processing your request right now.", False, None
         
